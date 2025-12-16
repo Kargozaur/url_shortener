@@ -1,7 +1,6 @@
 from fastapi import Depends, APIRouter, HTTPException, status
 from schemas.schemas import (
     UserCreate,
-    TokenPayload,
     Token,
     UserLogin,
     UserResponse,
@@ -11,7 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from database import get_db
 from models.models import User
 from oauth2.hash_pass import hash_password, verify_password
-from oauth2.oauth2 import create_access_token, get_current_user
+from oauth2.oauth2 import create_access_token
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
@@ -53,7 +52,7 @@ async def login_user(
     query = await db.execute(
         select(User).where(User.email == user_credential.email)
     )
-    user_data = query.scalar_one_or_none()
+    user_data: User | None = query.scalar_one_or_none()
     fake_hast = "$2b$12$XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
     hashed_password = user_data.password if user_data else fake_hast
     if not (
@@ -64,7 +63,10 @@ async def login_user(
             detail="Invalid email or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    access_token = create_access_token(
-        data={"sub": str(user_data.id), "email": user_data.email}
+    access_token: str = create_access_token(
+        data={
+            "sub": str(user_data.id),  # type: ignore
+            "email": user_data.email,  # type: ignore
+        }
     )
     return {"access_token": access_token, "token_type": "bearer"}
