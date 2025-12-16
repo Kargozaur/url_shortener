@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from models.models import Base
 from database import engine
 from contextlib import asynccontextmanager
-from routers import users
+from routers import users, url_shortener
 
 
 @asynccontextmanager
@@ -22,6 +22,7 @@ def main():
 
 
 app.include_router(users.router)
+app.include_router(url_shortener.router)
 
 if __name__ == "__main__":
     main()

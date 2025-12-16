@@ -37,6 +37,7 @@ async def create_user(
         await db.commit()
         await db.refresh(new_user)
     except Exception:
+        await db.rollback()
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail=f"{Exception}",
