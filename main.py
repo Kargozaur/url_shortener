@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from models.models import Base
 from database import engine
 from contextlib import asynccontextmanager
+from routers import users
 
 
 @asynccontextmanager
@@ -19,6 +20,8 @@ app = FastAPI(lifespan=lifespan)
 def main():
     return {"data": "Hello from url-shortener!"}
 
+
+app.include_router(users.router)
 
 if __name__ == "__main__":
     main()
