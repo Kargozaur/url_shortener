@@ -35,7 +35,7 @@ def verify_access_token(
         payload: dict = jwt.decode(
             token, SECRET_KEY, algorithms=[ALGORITHM]
         )
-        id = payload.get("user_id")
+        id = payload.get("sub")
         if not id:
             raise credential_exception
         return TokenPayload(sub=id)
@@ -53,8 +53,9 @@ async def get_current_user(
         headers={"WWW-Authenticate": "Bearer"},
     )
     token_data = verify_access_token(token, credential_exception)
+    uid = int(token_data.sub)  # type: ignore
     result = await db.execute(
-        select(models.User).where(models.User.id == token_data.sub)
+        select(models.User).where(models.User.id == uid)
     )
     user = result.scalar_one_or_none()
     if not user:

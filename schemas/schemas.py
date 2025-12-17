@@ -37,6 +37,40 @@ class UserResponse(BaseModel):
     model_config = SettingsConfigDict(from_attributes=True)
 
 
+class CreateLongURL(BaseModel):
+    url: str
+
+    @field_validator("url", mode="before")
+    @classmethod
+    def validate_url(cls, value):
+        pattern = r"^https?://"
+        pattern += r"(?:www\.)?"
+        pattern += r"[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?"
+        pattern += (
+            r"(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*"
+        )
+        pattern += r"(?::\d+)?"
+        pattern += r"(?:/.*)?"
+
+        if not re.match(pattern, value):
+            raise ValueError(f"{value} has to be a proper URL")
+        return value
+
+
+class URLCreateResponse(BaseModel):
+    id: int
+    url_code: str
+    short_url: str
+
+
+class ShortURLResponse(BaseModel):
+    id: int
+    short_url: str
+    url: str
+
+    model_config = SettingsConfigDict(from_attributes=True)
+
+
 class Token(BaseModel):
     access_token: str
     token_type: str
